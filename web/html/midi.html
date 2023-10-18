@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Metallophone</title>
+	<script type="text/javascript" src="../js/jquery.js"></script>
+	<script type="text/javascript" src="../js/MidiConvert.js"></script>
+	<script type="text/javascript" src="../js/Tone.js"></script>	
+
+	<style type="text/css">
+
+		body {
+			font-family: "Roboto Mono", monospace;
+			text-align: center;
+			margin: 0px;
+		}
+
+		table {
+			position:absolute;
+			top:110px;
+			width:100%;
+			margin:auto;
+		}
+
+		thead td {border: 2px solid black;}
+		tfoot td {border: 2px solid black;}
+
+		button {
+			position: absolute;top:0px;right:-60px;
+			width: 50px;
+			height: 100px;
+			color: black;
+		} 
+
+		#playall {
+			display:none;
+		}
+	
+		#FileDrop{
+			position: absolute;top:0px;
+			width: 500px;
+			height: 100px;
+			margin-left: -250px;
+			border: 2px dashed black;
+			left: 50%;
+			color: black;
+		}
+
+		#FileDrop.Hover{
+			background-color: black;
+			color: white;
+		}
+
+		#FileDrop input {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			opacity: 0;
+			left: 0px;
+			top: 0px;
+		}
+
+		#FileDrop #Text {
+			width: 100%;
+			height: 100%;
+			line-height: 100px;
+			text-align: center;
+		}
+
+
+
+		#dump {
+			height:100px;
+			border:none;
+			width:100%;
+		}
+
+
+	</style>
+
+
+<script type="text/javascript">
+		var synth = new Tone.PolySynth().toDestination();
+
+		function playNote(time, event){
+			// jouer une note 
+			console.log("Playtone"); 
+			synth.triggerAttackRelease(event.name, event.duration, time, event.velocity);
+			console.log(event.name); 
+			console.log(event.duration); 
+			console.log(time); 
+			console.log(event.velocity);
+		}
+
+</script>
+
+	<script type="text/javascript">
+
+	var currentMidi = null; 
+	var currentTrack = false; 
+
+	$(document).ready(function(){
+		// initialisation de la fonctionnalité de glisser-déposer
+		
+		if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
+			$("#Text").html("D&eacute;p&ocirc;t de fichiers non support&eacute;");
+		} else {
+
+			var fileDrop = document.querySelector("#FileDrop")
+
+			fileDrop.addEventListener("dragenter", function(){
+				fileDrop.classList.add("Hover");
+			})
+
+			fileDrop.addEventListener("dragleave", function(){
+				fileDrop.classList.remove("Hover");
+			});
+
+			fileDrop.addEventListener("drop", function(){
+				fileDrop.classList.remove("Hover");
+			});
+
+			document.querySelector("#FileDrop input").addEventListener("change", function(e){
+				//get the files
+				var files = e.target.files;
+				if (files.length > 0){
+					var file = files[0];
+					document.querySelector("#FileDrop #Text").textContent = file.name;
+					$("#tracks").empty();
+					parseFile(file);
+				}
+			});
+		}
+
+	
+	});
+
+
+		function parseFile(file){
+			//lecture du fichier déposé 
+			var reader = new FileReader();
+			reader.onload = function(e){
+				// fonction appelée lorsque le fichier a terminé d'être chargé par le navigateur 
+				var i, jTr, jBtnJouer, jBtnTester, jBtnStop, meta; 
+				currentMidi = MidiConvert.parse(e.target.result); // transformation MIDI <-> JSON
+
+				for(i=0;i<currentMidi.tracks.length;i++) {
+					meta = getMetaTrack(i); // lecture de la piste i 
+				
+					jTr = $("<tr>"); 
+					jTr.append("<td>" + i + "</td>");
+					jTr.append("<td>" + currentMidi.tracks[i].instrument + "</td>");
+					jTr.append("<td>" + Math.round(currentMidi.tracks[i].startTime*100)/100 + "</td>");
+					jTr.append("<td>" + Math.round(currentMidi.tracks[i].duration*100)/100  + "</td>");
+
+					jTr.append("<td>" + currentMidi.tracks[i].notes.length + "</td>");
+					jTr.append("<td>" + meta.min  + "</td>");
+					jTr.append("<td>" + meta.max  + "</td>");
+					jTr.append('<td title="' + meta.listNotes.toString() + '">' + meta.nb  + "</td>");
+
+					// Associations entre boutons et fonctions de rappel
+					// Utilisation de closures pour stocker la valeur de la piste à jouer  
+					jBtnTester = $('<input  type="button">').val(">").click(mkTTrack(i)); // jouer un son par le navigateur
+					jBtnStop = $('<input  type="button">').val("X").click(stopTrack);
+					jBtnJouer = $('<input  type="button">').val(">").click(mkJTrack(i));; // envoyer les sons au megaPI
+
+					// Affichage des boutons dans l'IHM
+					jTr.append($("<td>").append(jBtnTester).append(jBtnStop));
+					jTr.append($("<td>").append(jBtnJouer));
+					$("#tracks").append(jTr); 
+
+					console.log("piste " + i + " : " + currentMidi.tracks[i].notes.length + " notes");
+				}
+				
+				currentTrack = false;				
+				Tone.Transport.bpm.value = currentMidi.bpm;
+				Tone.Transport.timeSignature = currentMidi.timeSignature;
+
+				// bouton de lecture de toutes les pistes à la fois 
+				$("#playall").show().click(playAll);
+ 
+ 				// Affichage du fichier complet pour copier/coller 
+				$("#dump").val(JSON.stringify(currentMidi, undefined, 2));
+			};
+			
+			// lancement du chargement du fichier
+			reader.readAsBinaryString(file);
+		}
+
+		function stopTrack(){
+			// arrête toutes les pistes 
+			console.log("stop tracks");
+			Tone.Transport.stop();
+			currentTrack.cancel();
+			currentTrack = false;
+		}
+
+		function mkTTrack(numero) {
+			// numero est une variable locale de la fonction mkTTrack
+			return function () {
+				// L'utilisation de function() définit un scope 
+				// dans lequel la variable locale de mkTTrack est enfermé : on parle de "closure" / fermeture
+				$("#dump").val(JSON.stringify(currentMidi.tracks[numero].notes));
+				if (!currentTrack) {
+					console.log("Lecture track " + numero);
+					currentTrack = new Tone.Part(playNote, currentMidi.tracks[numero].notes).start();
+					Tone.Transport.start("+0.1", currentMidi.tracks[numero].startTime);
+					Tone.start();
+				} 				
+			}
+		}
+
+		var allTracks = []; 
+
+		function stopAll() {
+			// annuler toutes les pistes en cours 
+			console.log("playAll : stopAll");
+			var i; 
+			Tone.Transport.stop();
+			currentTrack = false;
+			for(i=0;i<allTracks.length;i++) {
+				allTracks[i].cancel();
+			}
+			$("#playall").off("click");
+			$("#playall").click(playAll); 
+		}
+
+		function playAll() {
+			// jouer toutes les pistes
+			console.log("playAll : start");
+			Tone.start();
+			var i = 0; 
+			Tone.Transport.stop();
+			currentTrack = true;
+			for(i=0;i<currentMidi.tracks.length;i++) {
+				allTracks.push(new Tone.Part(playNote, currentMidi.tracks[i].notes).start()); 
+				// les références vers chacun des threads de lecture sont stockées dans le tableau allTracks
+			}
+			Tone.Transport.start();
+			$("#playall").off("click");
+			$("#playall").click(stopAll); 
+		}
+
+		function mkJTrack(numero) {
+			// jouer une piste 
+			// on enferme le numéro de la piste à jouer à l'aide d'une closure
+			return function () {
+				console.log("Metallophone track " + numero);
+				var i,noteName; 
+				$("#dump").val(JSON.stringify(currentMidi.tracks[numero].notes));
+				
+				for(i=0;i<currentMidi.tracks[numero].notes.length;i++) {
+					noteName = currentMidi.tracks[numero].notes[i].name; 
+					console.log(noteName+ " " + name2num(noteName)); 
+					$.ajax({url: "../getenv/getenv_python.cgi",data: {note:noteName}});
+				}
+
+				 
+			}
+		}
+
+function name2num(nom){
+	// TODO: configurer ce tableau pour sélectionner les valeurs à envoyer au RPI 
+	// en fonction des noms des notes à jouer 
+	var data = {
+		D4:0,
+		E4:1,
+		F4:2,
+		'G#4':3, // attention : # est un caratère spécial non autorisé dans les identificateurs
+		A4:4,
+		B4:5,
+		C5:6,
+		D5:7,
+		E5:8,
+		F5:9,
+		G5:10,
+		A5:11,
+		B5:12,
+		C6:13
+	};
+
+	return data[nom]; 	
+}
+
+
+function getMetaTrack(numero) {
+	// récupération des méta-données d'une piste 
+	var listNotes = []; 
+	var nbNotes = 0; 
+	var currentNote; 
+
+	if (currentMidi.tracks[numero].notes.length == 0) 
+		return {"min":0, "imin":0, "max":0, "imax":0, "nb":0,"listNotes":[]};
+
+	var min =currentMidi.tracks[numero].notes[0].midi;
+	var imin = 0; var imax =0; 
+	var max =currentMidi.tracks[numero].notes[0].midi; 
+
+	for(i=1;i<currentMidi.tracks[numero].notes.length;i++) {
+		currentNote = currentMidi.tracks[numero].notes[i].midi; 
+		currentName = currentMidi.tracks[numero].notes[i].name; 
+
+		if (listNotes.indexOf(currentName) == -1) {
+			listNotes.push(currentName); 
+			nbNotes++;
+			console.log("trouve : " + currentName);
+		}
+
+		if (currentNote<min) {
+			imin =  currentNote; 
+			min = currentMidi.tracks[numero].notes[i].name; 
+		}
+
+		if (currentNote>max) {
+			imax =  currentNote;
+			max = currentMidi.tracks[numero].notes[i].name; 
+		}
+	}
+
+	return {"min":min, "imin":imin, "max":max, "imax":imax, "nb":nbNotes, "listNotes":listNotes};
+}
+	</script>
+
+
+</head>
+
+<body>
+
+	<!-- D'après https://github.com/Tonejs/MidiConvert  
+		Conversions :	http://newt.phys.unsw.edu.au/jw/notes.html
+	-->
+
+	<div id="FileDrop">
+			<div id="Text">
+				D&eacute;poser votre fichier midi ici
+			</div>
+			<input type="file" accept="audio/midi">
+			<button id="playall">>|</button>
+	</div>
+	
+
+	
+
+
+
+	<table>
+	<thead>
+	<tr>
+		<td>Piste</td>
+		<td>Instrument</td>
+		<td>D&eacute;but</td>
+		<td>Dur&eacute;e</td>
+		<td>Notes</td>
+		<td>Min</td>
+		<td>Max</td>
+		<td>Diff</td>
+		<td>Tester</td>
+		<td>Jouer</td>
+	</tr>
+	</thead>
+
+	<tbody id="tracks">
+	</tbody>
+
+	<tfoot>
+	<tr><td colspan="10"><textarea id="dump"></textarea></td></tr>
+	</tfoot>
+	</table>
+
+
+</body>
+</html>
