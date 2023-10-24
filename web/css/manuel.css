@@ -80,18 +80,3 @@
 #black-board div:hover{
     background-color:gray;
 }
-footer{
-    display: flex;
-    background-color: #999999;
-    position: relative;
-}
-#copyright
-{   
-    width:100%;
-    color: white;
-    display: flex;
-    vertical-align: top;
-    justify-content: center;
-    align-items: center;
-    
-}

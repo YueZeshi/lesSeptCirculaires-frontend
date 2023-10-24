@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
+	<meta charset="UTF-8">
+    <link rel="stylesheet" href="../css/basic.css" type="text/css">
     <link rel="stylesheet" href="../css/manuel.css" type="text/css">
 	<script type="text/javascript" src="../js/jquery.js"></script>
     </head>
@@ -9,7 +11,7 @@
         <div id="head">
             <a href="../index.html" id="return"><div class="head-element">RETOUR</div></a>
             <div class="head-element" id="title">A vous de jouer!</div>
-            <a href="../html/midi.html" id="midi"><div class="head-element">changer à mode MIDI</div></a>
+            <a href="../html/midi.html" id="midi"><div class="head-element">changer a mode MIDI</div></a>
         </div>
         <div class="board">
             <div class="key white" note="1"></div>
@@ -32,14 +34,13 @@
     <script>
         $(document).ready(init);
         function init(){
-            $(".key1").click(traiterClick);
-            $(".key2").click(traiterClick);
+            $(".key").click(traiterClick);
         }
     </script>
-    <script> // functions
+    <script>
     function traiterClick(){
-        // console.log($(this).html());
-        index = $(this).html();
-        $.get({url:"../cgi/getenv_python.cgi",data:{index}})
+	note = $(this).attr("note");        
+	console.log(note);
+        $.get({url:"../cgi/getenv_python.cgi",data:{note}})
     }</script>
 </html>

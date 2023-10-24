@@ -1,0 +1,20 @@
+body {
+    font-family: "Roboto Mono", monospace;
+    text-align: center;
+    margin: 0px;
+}
+footer{
+    display: flex;
+    background-color: #999999;
+    position: relative;
+}
+#copyright
+{   
+    width:100%;
+    color: white;
+    display: flex;
+    vertical-align: top;
+    justify-content: center;
+    align-items: center;
+    
+}

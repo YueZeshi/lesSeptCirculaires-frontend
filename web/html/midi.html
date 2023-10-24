@@ -1,79 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Metallophone</title>
+<meta charset="UTF-8">	
+<title>Metallophone</title>
+	
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/MidiConvert.js"></script>
 	<script type="text/javascript" src="../js/Tone.js"></script>	
 
+    <link rel="stylesheet" href="../css/basic.css" type="text/css">
+    <link rel="stylesheet" href="../css/midi.css" type="text/css">
 	<style type="text/css">
-
-		body {
-			font-family: "Roboto Mono", monospace;
-			text-align: center;
-			margin: 0px;
-		}
-
-		table {
-			position:absolute;
-			top:110px;
-			width:100%;
-			margin:auto;
-		}
-
-		thead td {border: 2px solid black;}
-		tfoot td {border: 2px solid black;}
-
-		button {
-			position: absolute;top:0px;right:-60px;
-			width: 50px;
-			height: 100px;
-			color: black;
-		} 
-
-		#playall {
-			display:none;
-		}
-	
-		#FileDrop{
-			position: absolute;top:0px;
-			width: 500px;
-			height: 100px;
-			margin-left: -250px;
-			border: 2px dashed black;
-			left: 50%;
-			color: black;
-		}
-
-		#FileDrop.Hover{
-			background-color: black;
-			color: white;
-		}
-
-		#FileDrop input {
-			position: absolute;
-			width: 100%;
-			height: 100%;
-			opacity: 0;
-			left: 0px;
-			top: 0px;
-		}
-
-		#FileDrop #Text {
-			width: 100%;
-			height: 100%;
-			line-height: 100px;
-			text-align: center;
-		}
-
-
-
-		#dump {
-			height:100px;
-			border:none;
-			width:100%;
-		}
-
 
 	</style>
 
@@ -251,10 +188,8 @@
 				for(i=0;i<currentMidi.tracks[numero].notes.length;i++) {
 					noteName = currentMidi.tracks[numero].notes[i].name; 
 					console.log(noteName+ " " + name2num(noteName)); 
-					$.ajax({url: "../getenv/getenv_python.cgi",data: {note:noteName}});
+					$.ajax({url: "../cgi/getenv_python.cgi",data:{note:name2num(noteName)}});
 				}
-
-				 
 			}
 		}
 
@@ -262,23 +197,20 @@ function name2num(nom){
 	// TODO: configurer ce tableau pour sélectionner les valeurs à envoyer au RPI 
 	// en fonction des noms des notes à jouer 
 	var data = {
-		D4:0,
-		E4:1,
-		F4:2,
-		'G#4':3, // attention : # est un caratère spécial non autorisé dans les identificateurs
-		A4:4,
-		B4:5,
-		C5:6,
-		D5:7,
-		E5:8,
-		F5:9,
-		G5:10,
-		A5:11,
-		B5:12,
-		C6:13
+		C:1,
+		'C#':2,
+		D:3,
+		'D#':4,
+		E:5,
+		F:6,
+		'F#':7,
+		G:8,
+		'G#':9,
+		A:10,
+		'A#':11,
+		B:12,
 	};
-
-	return data[nom]; 	
+	return data[nom.slice(0,-1)]; 	
 }
 
 
@@ -329,6 +261,12 @@ function getMetaTrack(numero) {
 		Conversions :	http://newt.phys.unsw.edu.au/jw/notes.html
 	-->
 
+	<div id="head">
+		<a href="../index.html" id="return"><div class="head-element">RETOUR</div></a>
+		<div class="head-element" id="title">A vous de jouer!</div>
+		<a href="../html/manuel.html" id="manuel"><div class="head-element">changer a mode manuel</div></a>
+	</div>
+
 	<div id="FileDrop">
 			<div id="Text">
 				D&eacute;poser votre fichier midi ici
@@ -367,5 +305,8 @@ function getMetaTrack(numero) {
 	</table>
 
 
+    <footer>
+        <div id="copyright">© les 7 circulaires</div>
+    </footer>
 </body>
 </html>
