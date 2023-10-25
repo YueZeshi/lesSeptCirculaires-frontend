@@ -2,7 +2,6 @@
 <html>
     <head>
 	<meta charset="UTF-8">
-    <title>Métonneauphone</title>
     <link rel="stylesheet" href="../css/basic.css" type="text/css">
     <link rel="stylesheet" href="../css/manuel.css" type="text/css">
 	<script type="text/javascript" src="../js/jquery.js"></script>
@@ -11,7 +10,7 @@
     <body>
         <div id="head">
             <a href="../index.html" id="return"><div class="head-element">RETOUR</div></a>
-            <div class="head-element" id="title">Mode Manuel</div>
+            <div class="head-element" id="title">A vous de jouer!</div>
             <a href="../html/midi.html" id="midi"><div class="head-element">changer a mode MIDI</div></a>
         </div>
         <div class="board">
@@ -42,6 +41,6 @@
     function traiterClick(){
 	note = $(this).attr("note");        
 	console.log(note);
-    $.get({url:"../cgi/getenv_python.cgi",data:{note:note,interval:1}})
+        $.get({url:"../cgi/getenv_python.cgi",data:{note:note,interval:100}})
     }</script>
 </html>

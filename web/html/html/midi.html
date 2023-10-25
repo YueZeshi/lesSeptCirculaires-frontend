@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">	
-<title>Métonneauphone</title>
+<title>Metallophone</title>
 	
 	<script type="text/javascript" src="../js/jquery.js"></script>
 	<script type="text/javascript" src="../js/MidiConvert.js"></script>
@@ -189,8 +189,7 @@
 					time_pre=time_cur;
 					noteName = currentMidi.tracks[numero].notes[i].name;
 					time_cur = currentMidi.tracks[numero].notes[i].time;
-					interval=parseInt(10*(time_cur-time_pre));
-					if(time_cur==time_pre)break;
+					interval=time_cur-time_pre;
 					console.log(noteName+ " " + name2num(noteName)+' '+interval); 
 					$.ajax({url: "../cgi/getenv_python.cgi",data:{note:name2num(noteName),interval:interval}});
 				}
@@ -267,7 +266,7 @@ function getMetaTrack(numero) {
 
 	<div id="head">
 		<a href="../index.html" id="return"><div class="head-element">RETOUR</div></a>
-		<div class="head-element" id="title">Mode MIDI</div>
+		<div class="head-element" id="title">A vous de jouer!</div>
 		<a href="../html/manuel.html" id="manuel"><div class="head-element">changer a mode manuel</div></a>
 	</div>
 

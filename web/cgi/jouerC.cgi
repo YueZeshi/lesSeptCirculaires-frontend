@@ -1,6 +1,6 @@
 #! /bin/bash
 
 echo "Content-type:text/html"
-echo "Location:..html/manuel.html"
+echo "Location:../html/manuel.html"
 echo ""
-echo -n 'L' > /dev/ttyAMA0
+echo -n 'C' > /dev/ttyAMA0

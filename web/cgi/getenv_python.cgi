@@ -14,12 +14,12 @@ form = cgi.FieldStorage()
 
 # Get data from fields
 valeur = form.getvalue('note')
-# time = form.getvalue('time')
+interval = form.getvalue('interval')
 
 if (valeur!=None):
 	ser=serial.Serial('/dev/ttyAMA0',baudrate=9600,timeout=10)
-	# ser.write(114514)
-	ser.write([65+int(float(valeur))])
-	# ser.write(int(1000*float(time)))
-	
+	# ser.write([255])
+	# ser.write([255,int(float(valeur)),int(1000*float(interval))])
+	ser.write([int(float(valeur))])
+	# ser.write([int(float(interval))])
 

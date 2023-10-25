@@ -2,6 +2,7 @@ body {
     font-family: "Roboto Mono", monospace;
     text-align: center;
     margin: 0px;
+    font-size: 25px;
 }
 footer{
     display: flex;
