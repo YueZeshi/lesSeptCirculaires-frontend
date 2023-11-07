@@ -3,13 +3,19 @@
 #define NE1 31
 #define BL1 34
 #define BL2 35
-long int count=0;
-int t_ini,t_fin,dt = 10,ddt=5;
+#define EM 10
+long count=0;
+unsigned long du_reponse,t_command;
+int dt = 10;
 int V;
-int last_err,c_set,c_cur,err,int_err,der_err;
+double last_err,c_set,c_cur,err,int_err,der_err;
+int tape_command;
 void setup() {
   // put your setup code here, to run once:
+  err=0;
   c_set=0;
+  du_reponse=700;//à déterminer grâce au temps de réponse maximal de moteur
+  tape_command=0;
   Serial2.begin(9600);
   Serial.begin(9600);
   pinMode(PWMB,OUTPUT);
@@ -17,7 +23,9 @@ void setup() {
   pinMode(NE1,INPUT);
   pinMode(BL1,OUTPUT);
   pinMode(BL2,OUTPUT);
+  pinMode(EM,OUTPUT);
   attachInterrupt(digitalPinToInterrupt(NE2),inter,RISING);
+  digitalWrite(EM,LOW);
 }
 
 void loop() {
@@ -26,13 +34,17 @@ void loop() {
   if(Serial2.available()){
     int note=Serial2.read(); 
     c_set = note*50;
+    tape_command=1;
+    t_command=millis();
   }
+  
   // PID control
   last_err=err;
   c_cur=count;
   err = c_cur-c_set;
   int_err += err*0.001*dt;
   der_err = (err-last_err)*0.001/dt;
+  //*0.001/dt;
   V = PID(err,int_err,der_err);
   // time control
   // t_ini = millis()%30000;
@@ -50,8 +62,17 @@ void loop() {
     rotation_ccw(PWM);
     delay(dt);
   }
-  // }
+  if(tape_command&&(millis()-t_command)>du_reponse){//abs(der_err)<2 &&abs(err)<5 && tape_fin==0){
+    digitalWrite(EM,HIGH);
+    delay(50);//30 mieux
+    digitalWrite(EM,LOW);
+    tape_command=0;
+  }
+  // Serial.println(count);
+  // rotation_ccw(9.0*255/12.0);
+  // if(count%600<1){Serial.println(millis());}
 }
+
 
 
 void rotation_ccw(int PWM){
@@ -75,9 +96,9 @@ void inter(){
 }
 double PID(int err,int int_err,int der_err){
   double kp,ki,kd;
-  kp = 0.1;
-  ki=0.01;
-  kd=20;
+  kp = 0.2;
+  ki=0.005;
+  kd=20000;
   return kp*err+ki*int_err+kd*der_err;
 }
 // #include <MeMegaPi.h>
