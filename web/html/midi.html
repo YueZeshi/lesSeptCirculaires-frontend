@@ -184,15 +184,16 @@
 				console.log("Metallophone track " + numero);
 				var i,noteName,time_pre,time_cur=0,interval; 
 				$("#dump").val(JSON.stringify(currentMidi.tracks[numero].notes));
-				
+				var time_start = (new Date()).valueOf();
+				console.log(time_start);
 				for(i=0;i<currentMidi.tracks[numero].notes.length;i++) {
-					time_pre=time_cur;
+					while((new Date()).valueOf()-time_start<currentMidi.tracks[numero].notes[i].time*1000);
 					noteName = currentMidi.tracks[numero].notes[i].name;
-					time_cur = currentMidi.tracks[numero].notes[i].time;
-					interval=parseInt(10*(time_cur-time_pre));
-					if(time_cur==time_pre)break;
+					//time_cur = currentMidi.tracks[numero].notes[i].time;
+					//interval=parseInt(10*(time_cur-time_pre));
+					//if(time_cur==time_pre)break;
 					console.log(noteName+ " " + name2num(noteName)+' '+interval); 
-					$.ajax({url: "../cgi/getenv_python.cgi",data:{note:name2num(noteName),interval:interval}});
+					$.ajax({url: "../cgi/getenv_python.cgi",data:{note:name2num(noteName)}});
 				}
 			}
 		}

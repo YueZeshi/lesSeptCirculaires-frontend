@@ -42,6 +42,6 @@
     function traiterClick(){
 	note = $(this).attr("note");        
 	console.log(note);
-    $.get({url:"../cgi/getenv_python.cgi",data:{note:note,interval:1}})
+    $.get({url:"../cgi/getenv_python.cgi",data:{note:note}})
     }</script>
 </html>

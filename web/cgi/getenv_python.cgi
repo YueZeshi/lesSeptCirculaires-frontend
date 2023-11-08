@@ -14,7 +14,7 @@ form = cgi.FieldStorage()
 
 # Get data from fields
 valeur = form.getvalue('note')
-interval = form.getvalue('interval')
+#interval = form.getvalue('interval')
 
 if (valeur!=None):
 	ser=serial.Serial('/dev/ttyAMA0',baudrate=9600,timeout=10)
