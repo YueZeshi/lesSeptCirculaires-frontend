@@ -7,15 +7,18 @@
 long count=0;
 unsigned long du_reponse,t_command;
 int dt = 10;
+int tc=200,tc_pp=40;
 int V;
 double last_err,c_set,c_cur,err,int_err,der_err;
-int tape_command;
+int tape_command,configuration_mode;
+int note;
 void setup() {
   // put your setup code here, to run once:
   err=0;
   c_set=0;
-  du_reponse=700;//à déterminer grâce au temps de réponse maximal de moteur
+  du_reponse=600;//à déterminer grâce au temps de réponse maximal de moteur
   tape_command=0;
+  configuration_mode=1;
   Serial2.begin(9600);
   Serial.begin(9600);
   pinMode(PWMB,OUTPUT);
@@ -32,45 +35,81 @@ void loop() {
   // put your main code here, to run repeatedly:
   // read command
   if(Serial2.available()){
-    int note=Serial2.read(); 
-    c_set = note*50;
-    tape_command=1;
-    t_command=millis();
+    note=Serial2.read(); 
+    switch(note){
+      case 0:
+      case 20:
+      case 30:
+      case 21:
+      case 31:
+        configuration_mode=1;
+        break;
+      default:
+        configuration_mode=0;
+        c_set = (note-1)*50;
+        tape_command=1;
+        t_command=millis();
+        break;
+    }
   }
-  
-  // PID control
-  last_err=err;
-  c_cur=count;
-  err = c_cur-c_set;
-  int_err += err*0.001*dt;
-  der_err = (err-last_err)*0.001/dt;
-  //*0.001/dt;
-  V = PID(err,int_err,der_err);
-  // time control
-  // t_ini = millis()%30000;
-  // while((millis()%30000-t_ini)<dt){
-  V = constrain(V,-9.0,9.0);
-  if(V>=0)
-  {
-    int PWM = V*255/12;
-    rotation_cw(PWM);
-    delay(dt);
+  if(configuration_mode){
+    int PWM = 5*255/12;
+    int PWM_pp = 2*255/12;
+    switch(note){
+      case 20:
+        rotation_cw(PWM);
+        delay(tc);
+        break;
+      case 21:
+        rotation_cw(PWM_pp);
+        delay(tc_pp);
+        break;
+      case 30:
+        rotation_ccw(PWM);
+        delay(tc);
+        break;
+      case 31:
+        rotation_ccw(PWM_pp);
+        delay(tc_pp);
+        break;
+      default:
+        stop();    
+    }
+    note=0;
+    count=0;
   }
-  else
-  {
-    int PWM = -V*255/12;
-    rotation_ccw(PWM);
-    delay(dt);
+  else{
+    // PID control
+    last_err=err;
+    c_cur=count;
+    err = c_cur-c_set;
+    int_err += err*0.001*dt;
+    der_err = (err-last_err)*0.001/dt;
+    //*0.001/dt;
+    V = PID(err,int_err,der_err);
+    // time control
+    // t_ini = millis()%30000;
+    // while((millis()%30000-t_ini)<dt){
+    V = constrain(V,-9.0,9.0);
+    if(V>=0)
+    {
+      int PWM = V*255/12;
+      rotation_cw(PWM);
+      delay(dt);
+    }
+    else
+    {
+      int PWM = -V*255/12;
+      rotation_ccw(PWM);
+      delay(dt);
+    }
+    if(tape_command&&(millis()-t_command)>du_reponse){//abs(der_err)<2 &&abs(err)<5 && tape_fin==0){
+      digitalWrite(EM,HIGH);
+      delay(50);//30 mieux
+      digitalWrite(EM,LOW);
+      tape_command=0;
+    }
   }
-  if(tape_command&&(millis()-t_command)>du_reponse){//abs(der_err)<2 &&abs(err)<5 && tape_fin==0){
-    digitalWrite(EM,HIGH);
-    delay(50);//30 mieux
-    digitalWrite(EM,LOW);
-    tape_command=0;
-  }
-  // Serial.println(count);
-  // rotation_ccw(9.0*255/12.0);
-  // if(count%600<1){Serial.println(millis());}
 }
 
 
