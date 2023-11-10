@@ -187,7 +187,7 @@
 				var time_start = (new Date()).valueOf();
 				console.log(time_start);
 				for(i=0;i<currentMidi.tracks[numero].notes.length;i++) {
-					while((new Date()).valueOf()-time_start<currentMidi.tracks[numero].notes[i].time*1000);
+					while((new Date()).valueOf()-time_start<currentMidi.tracks[numero].notes[i].time*1000*4);
 					noteName = currentMidi.tracks[numero].notes[i].name;
 					//time_cur = currentMidi.tracks[numero].notes[i].time;
 					//interval=parseInt(10*(time_cur-time_pre));

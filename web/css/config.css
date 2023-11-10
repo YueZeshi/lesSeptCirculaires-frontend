@@ -1,0 +1,57 @@
+#head{
+    display: flex;
+    position: relative;
+    height:100px; 
+ }
+ .head-element{
+     display: flex;
+     position:relative;
+     justify-content: center;
+     align-items: center;
+     width:100%; 
+ }
+ #return{
+    border: 1px solid black;
+    border-radius: 10%;
+    display: flex;
+    width: 20%;
+    font-size:30px;
+    background-color: #ddd;
+}
+#return:hover{
+    background-color: #eee;
+}
+#title{
+    width: 60%;
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-size: 50px;
+    background-color: #fff;
+    }
+
+#vide{
+    width: 20%;
+    background-color: #fff;
+}
+
+#button_box{
+    display: flex;
+    position: relative;
+    height:200px; 
+}
+#button_box_precise{
+    display: flex;
+    position: relative;
+    height:400px; 
+}
+.button
+{
+    border: 2px solid black;
+    display: flex;
+    position:relative;
+    justify-content: center;
+    align-items: center;
+    width:100%; 
+}
+.button:hover{
+    background-color: #eee;
+}

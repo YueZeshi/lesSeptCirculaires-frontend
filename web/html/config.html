@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	<meta charset="UTF-8">
+    <title>Métonneauphone</title>
+    <link rel="stylesheet" href="../css/basic.css" type="text/css">
+    <link rel="stylesheet" href="../css/config.css" type="text/css">
+	<script type="text/javascript" src="../js/jquery.js"></script>
+    </head>
+
+    <body>
+        <div id="head">
+            <a href="../index.html" id="return"><div class="head-element">RETOUR</div></a>
+            <div class="head-element" id="title">Configuration Manuelle</div>
+            <div class="head-element" id="vide"></div>
+        </div>
+        <div id="button_box">
+            <div class="button" id="cw">Rotation horaire</div>
+            <div class="button" id="ccw">Rotation anti-horaire</div>
+        </div>
+        <div id="button_box_precise">
+            <div class="button" id="cw_p">Rotation horaire <br> plus précise</div>
+            <div class="button" id="ccw_p">Rotation anti-horaire <br> plus précise</div>
+        </div>
+        <footer>
+            <div id="copyright">© Les Sept Circulaires</div>
+        </footer>
+    </body>
+    <script>
+        $(document).ready(init);
+        function init(){
+            $("#cw").click(cwClick);
+            $("#ccw").click(ccwClick);
+            $("#cw_p").click(cw_pClick);
+            $("#ccw_p").click(ccw_pClick);
+        }
+    </script>
+    <script>
+    function cwClick(){
+	note = 20;        
+	console.log("rotate cw");
+    $.get({url:"../cgi/getenv_python.cgi",data:{note:note}})
+    }
+    function ccwClick(){
+	note = 30;        
+	console.log("rotate ccw");
+    $.get({url:"../cgi/getenv_python.cgi",data:{note:note}})
+    }
+    
+    function cw_pClick(){
+	note = 21;        
+	console.log("rotate cw pp");
+    $.get({url:"../cgi/getenv_python.cgi",data:{note:note}})
+    }
+    function ccw_pClick(){
+	note = 31;        
+	console.log("rotate ccw pp");
+    $.get({url:"../cgi/getenv_python.cgi",data:{note:note}})
+    }
+
+    </script>
+</html>
